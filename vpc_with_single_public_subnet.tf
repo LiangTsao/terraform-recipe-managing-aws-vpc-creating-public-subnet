@@ -1,20 +1,25 @@
+provider aws {
+     # profile="default"
+     region = "cn-northwest-1" 
+}
+
 # declare a VPC
 resource "aws_vpc" "my_vpc" {
   cidr_block       = "10.0.0.0/16"
   enable_dns_hostnames = true
 
   tags = {
-    Name = "My VPC"
+    Name = "caoliang1_VPC"
   }
 }
 
 resource "aws_subnet" "public" {
   vpc_id     = aws_vpc.my_vpc.id
   cidr_block = "10.0.0.0/24"
-  availability_zone = "us-east-1a"
+  availability_zone = "cn-northwest-1a"
 
   tags = {
-    Name = "Public Subnet"
+    Name = "caoliang1_Public Subnet"
   }
 }
 
@@ -22,11 +27,11 @@ resource "aws_internet_gateway" "my_vpc_igw" {
   vpc_id = aws_vpc.my_vpc.id
 
   tags = {
-    Name = "My VPC - Internet Gateway"
+    Name = "caoliang1_My VPC - Internet Gateway"
   }
 }
 
-resource "aws_route_table" "my_vpc_us_east_1a_public" {
+resource "aws_route_table" "my_vpc_cn_northwest_1a_public" {
     vpc_id = aws_vpc.my_vpc.id
 
     route {
@@ -35,13 +40,13 @@ resource "aws_route_table" "my_vpc_us_east_1a_public" {
     }
 
     tags = {
-        Name = "Public Subnet Route Table"
+        Name = "caoliang1_Public Subnet Route Table"
     }
 }
 
-resource "aws_route_table_association" "my_vpc_us_east_1a_public" {
+resource "aws_route_table_association" "my_vpc_cn_northwest_1a_public" {
     subnet_id = aws_subnet.public.id
-    route_table_id = aws_route_table.my_vpc_us_east_1a_public.id
+    route_table_id = aws_route_table.my_vpc_cn_northwest_1a_public.id
 }
 
 resource "aws_security_group" "allow_ssh" {
@@ -64,23 +69,24 @@ resource "aws_security_group" "allow_ssh" {
   }
 
   tags = {
-    Name = "allow_ssh_sg"
+    Name = "caoliang1_allow_ssh_sg"
   }
 }
 
+# ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20211001 
 resource "aws_instance" "my_instance" {
-  ami           = "ami-0ac019f4fcb7cb7e6"
+  ami           = "ami-01fac9af96c6500a9"
   instance_type = "t2.micro"
-  key_name = "Lenovo T410"
+  key_name = "liang_RSA"
   vpc_security_group_ids = [ aws_security_group.allow_ssh.id ]
   subnet_id = aws_subnet.public.id
   associate_public_ip_address = true
 
   tags = {
-    Name = "My Instance"
+    Name = "caoliang1_My Instance"
   }
 }
 
 output "instance_public_ip" {
-  value = "${aws_instance.my_instance.public_ip}"
+  value = aws_instance.my_instance.public_ip
 }
